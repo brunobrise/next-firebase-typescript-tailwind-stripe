@@ -1,7 +1,14 @@
 import Head from 'next/head';
 import Login from '../components/Login';
+import firebase from '../firebase/firebaseClient';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { createCheckoutSession } from '../stripe/createCheckoutSession';
+import usePremiumStatus from '../stripe/usePremiumStatus';
 
 export default function Home() {
+  const [user, userLoading] = useAuthState(firebase.auth());
+  const userIsPremium = usePremiumStatus(user);
+
   return (
     <>
       <Head>
@@ -14,13 +21,44 @@ export default function Home() {
       </Head>
 
       <main className='container mx-auto max-w-4xl'>
-        <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>
-          Next.js + Firebase + Typescript + Tailwind + Stripe
-        </h1>
+        {!user && userLoading && (
+          <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>Loading</h1>
+        )}
 
-        <p className='py-2'>Get started quickly with this!</p>
+        {!user && !userLoading && (
+          <>
+            <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>
+              Next.js + Firebase + Typescript + Tailwind + Stripe
+            </h1>
 
-        <Login />
+            <p className='py-2'>Get started quickly with this!</p>
+
+            <Login />
+          </>
+        )}
+
+        {user && !userLoading && (
+          <div>
+            <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>
+              Hello, {user.displayName}
+            </h1>
+            {!userIsPremium ? (
+              <>
+                <p>{user.uid}</p>
+                <p>{user.displayName}</p>
+                <button
+                  onClick={() => createCheckoutSession(user.uid)}
+                  type='button'
+                  className='bg-yellow-400 hover:bg-yellow-500 rounded p-2'
+                >
+                  Upgrade to premium!
+                </button>
+              </>
+            ) : (
+              <p className='py-2'>Thanks for being a premium member!</p>
+            )}
+          </div>
+        )}
       </main>
     </>
   );

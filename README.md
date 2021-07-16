@@ -1,34 +1,102 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Next + Firebase + Typescript + Tailwind + Stripe starter
 
-## Getting Started
+Re-usable example project with the following technology stack.
+* Next.js
+* Firebase
+* Typescript
+* Tailwind
+* Stripe
 
-First, run the development server:
+This was made using the [fantastic video](https://www.youtube.com/watch?v=P0Udy2Gi7n8) + [write-up](https://blog.jarrodwatts.com/set-up-subscription-payments-with-stripe-using-firebase-and-nextjs) by [Jarrod Watts](https://blog.jarrodwatts.com/).
 
-```bash
-npm run dev
-# or
-yarn dev
+This example includes **ONE** subscription option (premium).
+
+## Prep Work
+
+* Register for Firebase incl.
+  * Create a project and a web app (to collect your credentials)
+  * Upgrade to Blaze plan and **set up a billing alert**
+  * Install the `Run Subscription Payments with Stripe` extension
+    * During setup configuration, rename `Customer details and subscriptions collection` from `customers` -> `users`
+* Register for Stripe
+  * Ensure you've entered a business name for your new Stripe account
+  * Create a new Restricted Key (Dashboard > Developers > API Keys > + Create restricted key)
+    * Write access
+      * Checkout sessions
+      * Customers
+      * Customer portal
+    * Read access
+      * Subscriptions
+      * Plans
+
+## Usage
+
+1. Rename `.env.local.example` to `.env.local` and populate with your app credentials and Stripe keys
+2. Set up your preferred authentication providers within Firebase, and make corresponding buttons (refer to `/components/Login.tsx`)
+3. Set your Firestore Database rules as follows:
 ```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth.uid == uid;
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+      match /checkout_sessions/{id} {
+        allow read, write: if request.auth.uid == uid;
+      }
+      match /subscriptions/{id} {
+        allow read: if request.auth.uid == uid;
+      }
+    }
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+    match /products/{id} {
+      allow read: if true;
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+      match /prices/{id} {
+        allow read: if true;
+      }
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+      match /tax_rates/{id} {
+        allow read: if true;
+      }
+    }
+  }
+}
+```
+4. Set up a Stripe webhook
+  1. Retrieve the URL of your extension’s function (within Firebase, navigate to Extensions, click Manage on `Run Subscription Payments with Stripe` and then "How this extension works". It's roughly halfway down the page.)
+  2. Go back to the Stripe website. Stripe Dashboard > Developers > Webhooks > + Add endpoint
+     * Endpoint URL is from above step
+     * Events to send:
+       * product.created
+       * product.updated
+       * product.deleted
+       * price.created
+       * price.updated
+       * price.deleted
+       * checkout.session.completed
+       * customer.subscription.created
+       * customer.subscription.updated
+       * customer.subscription.deleted
+       * tax_rate.created
+       * tax_rate.updated
+       * invoice.paid
+       * invoice.payment_succeeded
+       * invoice.payment_failed
+       * invoice.upcoming
+       * invoice.marked_uncollectible
+       * invoice.payment_action_required
+     * Grab the `Signing secret`
+   3. Go back to the Firebase extension > Extension configuration > `Reconfigure extension` 
+   4. Replace the `Stripe webhook secret` value with the `Signing secret` created above
+5. Create some products in stripe. Stripe Dashboard > Products.
+   * Under "Product information" expand the Additional options. Click **+ Add metadata**. 
+     * Key: `firebaseRole`
+     * Value: A logical name based on the product. E.g. `premium`
+   * This identifier in Stripe will be passed to our Firestore so we can see what plan a user is on. This lets us [control access with custom claims and security rules](https://firebase.google.com/docs/auth/admin/custom-claims#:~:text=Control%20Access%20with%20Custom%20Claims%20and%20Security%20Rules,-Table%20of%20contents&text=The%20Firebase%20Admin%20SDK%20supports,access%20control%2C%20in%20Firebase%20apps.)
+6. Add your product price ID to `/stripe/createCheckoutSession.ts` replacing the placeholder `price_XXX`
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## How Stripe checkout works
+1. Stripe creates a new Firestore document during the checkout process (or rather, updates our user's document)
+2. Adds the checkout session ID to the document
+3. Navigates the user to the checkout session using the ID from Firestore (this logic is in `stripe/createCheckoutSession.ts`)
