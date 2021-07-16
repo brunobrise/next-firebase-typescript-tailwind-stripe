@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import Login from '../components/Login';
+import Login from '@components/Login';
 import firebase from '../firebase/firebaseClient';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { createCheckoutSession } from '../stripe/createCheckoutSession';
@@ -14,24 +14,24 @@ export default function Home() {
       <Head>
         <title>Next.js + Firebase + Typescript + Tailwind + Stripe</title>
         <meta
-          name='description'
-          content='Ready-to-use project built with Next.js + Firebase + Typescript + Tailwind + Stripe'
+          name="description"
+          content="Ready-to-use project built with Next.js + Firebase + Typescript + Tailwind + Stripe"
         />
-        <link rel='icon' href='/favicon.ico' />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className='container mx-auto max-w-4xl'>
+      <main className="container mx-auto max-w-4xl">
         {!user && userLoading && (
-          <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>Loading</h1>
+          <h1 className="mt-10 mb-10 text-2xl font-extrabold py-2">Loading</h1>
         )}
 
         {!user && !userLoading && (
           <>
-            <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>
+            <h1 className="mt-10 mb-10 text-2xl font-extrabold py-2">
               Next.js + Firebase + Typescript + Tailwind + Stripe
             </h1>
 
-            <p className='py-2'>Get started quickly with this!</p>
+            <p className="py-2">Get started quickly with this!</p>
 
             <Login />
           </>
@@ -39,7 +39,7 @@ export default function Home() {
 
         {user && !userLoading && (
           <div>
-            <h1 className='mt-10 mb-10 text-2xl font-extrabold py-2'>
+            <h1 className="mt-10 mb-10 text-2xl font-extrabold py-2">
               Hello, {user.displayName}
             </h1>
             {!userIsPremium ? (
@@ -48,14 +48,14 @@ export default function Home() {
                 <p>{user.displayName}</p>
                 <button
                   onClick={() => createCheckoutSession(user.uid)}
-                  type='button'
-                  className='bg-yellow-400 hover:bg-yellow-500 rounded p-2'
+                  type="button"
+                  className="bg-yellow-400 hover:bg-yellow-500 rounded p-2"
                 >
                   Upgrade to premium!
                 </button>
               </>
             ) : (
-              <p className='py-2'>Thanks for being a premium member!</p>
+              <p className="py-2">Thanks for being a premium member!</p>
             )}
           </div>
         )}

@@ -25,7 +25,7 @@ export const Login = ({}: LoginProps) => {
     <>
       <button
         onClick={() => signInWithGoogle()}
-        className='bg-green-400 hover:bg-green-500 rounded p-2'
+        className="bg-green-400 hover:bg-green-500 rounded p-2"
       >
         Sign in with Google
       </button>
