@@ -1,5 +1,5 @@
-import React, { ReactElement } from 'react';
-import firebase from '../firebase/firebaseClient';
+import React from 'react';
+import firebase from '@utils/firebase/firebaseClient';
 
 interface LoginProps {}
 

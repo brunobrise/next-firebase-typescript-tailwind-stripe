@@ -1,5 +1,6 @@
 {
   "name": "next-firebase-typescript-tailwind-stripe",
+  "author": "Matthew Stibbard",
   "version": "0.1.0",
   "private": true,
   "scripts": {

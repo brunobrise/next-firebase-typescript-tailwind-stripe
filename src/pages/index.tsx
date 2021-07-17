@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import Login from '@components/Login';
-import firebase from '../firebase/firebaseClient';
+import firebase from '@utils/firebase/firebaseClient';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { createCheckoutSession } from '../stripe/createCheckoutSession';
-import usePremiumStatus from '../stripe/usePremiumStatus';
+import { createCheckoutSession } from '@utils/stripe/createCheckoutSession';
+import usePremiumStatus from '@utils/stripe/usePremiumStatus';
+import { appName } from '@constants';
 
 export default function Home() {
   const [user, userLoading] = useAuthState(firebase.auth());
@@ -12,7 +13,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Next.js + Firebase + Typescript + Tailwind + Stripe</title>
+        <title>{appName}</title>
         <meta
           name="description"
           content="Ready-to-use project built with Next.js + Firebase + Typescript + Tailwind + Stripe"
@@ -44,8 +45,6 @@ export default function Home() {
             </h1>
             {!userIsPremium ? (
               <>
-                <p>{user.uid}</p>
-                <p>{user.displayName}</p>
                 <button
                   onClick={() => createCheckoutSession(user.uid)}
                   type="button"

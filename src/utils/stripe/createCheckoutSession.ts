@@ -1,5 +1,5 @@
-import firebase from '../firebase/firebaseClient';
-import initializeStripe from './initializeStripe';
+import firebase from '@utils/firebase/firebaseClient';
+import initializeStripe from '@utils/stripe/initializeStripe';
 
 export async function createCheckoutSession(uid: string) {
   const firestore = firebase.firestore();

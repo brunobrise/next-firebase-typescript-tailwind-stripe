@@ -1,4 +1,4 @@
-import firebase from '../firebase/firebaseClient';
+import firebase from '@utils/firebase/firebaseClient';
 
 export default async function isUserPremium(): Promise<boolean> {
   await firebase.auth().currentUser?.getIdToken(true);
