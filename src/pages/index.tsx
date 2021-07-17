@@ -1,14 +1,13 @@
 import Head from 'next/head';
 import Login from '@components/Login';
-import firebase from '@utils/firebase/firebaseClient';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useAuth } from '@hooks/use-auth';
 import { createCheckoutSession } from '@utils/stripe/createCheckoutSession';
 import usePremiumStatus from '@utils/stripe/usePremiumStatus';
 import { appName } from '@constants';
 
 export default function Home() {
-  const [user, userLoading] = useAuthState(firebase.auth());
-  const userIsPremium = usePremiumStatus(user);
+  const auth = useAuth();
+  const userIsPremium = usePremiumStatus(auth.user);
 
   return (
     <>
@@ -22,11 +21,7 @@ export default function Home() {
       </Head>
 
       <main className="container mx-auto max-w-4xl">
-        {!user && userLoading && (
-          <h1 className="mt-10 mb-10 text-2xl font-extrabold py-2">Loading</h1>
-        )}
-
-        {!user && !userLoading && (
+        {!auth.user && (
           <>
             <h1 className="mt-10 mb-10 text-2xl font-extrabold py-2">
               Next.js + Firebase + Typescript + Tailwind + Stripe
@@ -38,15 +33,15 @@ export default function Home() {
           </>
         )}
 
-        {user && !userLoading && (
+        {auth.user && (
           <div>
             <h1 className="mt-10 mb-10 text-2xl font-extrabold py-2">
-              Hello, {user.displayName}
+              Hello, {auth.user.displayName}
             </h1>
             {!userIsPremium ? (
               <>
                 <button
-                  onClick={() => createCheckoutSession(user.uid)}
+                  onClick={() => createCheckoutSession(auth.user.uid)}
                   type="button"
                   className="bg-yellow-400 hover:bg-yellow-500 rounded p-2"
                 >
@@ -56,6 +51,13 @@ export default function Home() {
             ) : (
               <p className="py-2">Thanks for being a premium member!</p>
             )}
+            <button
+              onClick={() => auth.signout()}
+              type="button"
+              className="text-white bg-red-600 hover:bg-red-700 rounded p-2"
+            >
+              Log out
+            </button>
           </div>
         )}
       </main>

@@ -28,9 +28,10 @@ Where to find things:
 - All application related code is located within `src/`
 - Components go in `src/components/` - absolute path `@components/`
 - Constants go in `src/constants.ts` - absolute path `@constants`
+- Application domain logic / modules go in `src/domain/` - absolute path `@domain/`
+- Hooks go in `src/hooks/` - absolute path `@hooks/`
 - Pages or API's go in `src/pages/` (nothing else can go here as per Next.js bundling requirements) - absolute path `@pages/`
 - Utilities go in `src/utils/` - absolute path `@utils/`
-- Application domain logic / modules go in `src/domain/` - absolute path `@domain/`
 
 ## Usage
 
@@ -125,12 +126,17 @@ service cloud.firestore {
 
 12. Add your product price ID to `/stripe/createCheckoutSession.ts` replacing the placeholder `price_XXX`
 
+## Adding new authentication providers
+
+Edit `src/hooks/use-auth.tsx` signin function. Default is just google, but can be expanded to take parameters for other providers - or duplicate the function per provider (e.g. signinWithGoogle).
+
 ## How Stripe checkout works
 
 1. Stripe creates a new Firestore document during the checkout process (or rather, updates our user's document)
 2. Adds the checkout session ID to the document
 3. Navigates the user to the checkout session using the ID from Firestore (this logic is in `stripe/createCheckoutSession.ts`)
 
-## Thanks to
+## References / Thanks to
 
+- [useHooks](https://usehooks.com/) for the wonderful use-auth hook example
 - [Jarrod Watts](https://blog.jarrodwatts.com/) for producing a fantastic [video](https://www.youtube.com/watch?v=P0Udy2Gi7n8) and [write-up](https://blog.jarrodwatts.com/set-up-subscription-payments-with-stripe-using-firebase-and-nextjs) on setting up Firebase/Stripe

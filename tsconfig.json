@@ -18,6 +18,7 @@
       "@components/*": ["src/components/*"],
       "@constants": ["src/constants.ts"],
       "@domain/*": ["src/domain/*"],
+      "@hooks/*": ["src/hooks/*"],
       "@pages/*": ["src/pages/*"],
       "@utils/*": ["src/utils/*"]
     }
